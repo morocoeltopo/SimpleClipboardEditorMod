@@ -230,6 +230,47 @@ public class ClipboardAccessibilityService extends AccessibilityService {
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
+        if (isOurOwnCopy) {
+            try {
+                if (clipboardManager != null) {
+                    ClipData clip = clipboardManager.getPrimaryClip();
+                    if (clip != null && clip.getItemCount() > 0) {
+                        CharSequence textChar = clip.getItemAt(0).coerceToText(this);
+                        if (textChar != null && textChar.toString().equals(lastCopiedText)) {
+                            isOurOwnCopy = false;
+                            return;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                // Ignore
+            }
+            isOurOwnCopy = false;
+        }
+
+        Preferences prefs = new Preferences(getSharedPreferences(Preferences.PREFS_NAME, MODE_PRIVATE));
+        boolean enabled = prefs.is(Preferences.Pref.FLOATING_BUBBLE);
+        if (!enabled) {
+            return;
+        }
+
+        try {
+            if (clipboardManager != null) {
+                ClipData clip = clipboardManager.getPrimaryClip();
+                if (clip != null && clip.getItemCount() > 0) {
+                    CharSequence textChar = clip.getItemAt(0).coerceToText(this);
+                    if (textChar != null) {
+                        String text = textChar.toString();
+                        if (!text.isEmpty() && !text.equals(lastCopiedText)) {
+                            lastCopiedText = text;
+                            showBubble(text);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error checking clipboard in onAccessibilityEvent", e);
+        }
     }
 
     @Override
