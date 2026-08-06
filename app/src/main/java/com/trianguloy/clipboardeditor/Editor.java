@@ -13,8 +13,10 @@ import static com.trianguloy.clipboardeditor.Preferences.Pref.SYNC_EXTERNAL;
 import static com.trianguloy.clipboardeditor.Preferences.Pref.SYNC_INPUT;
 import static com.trianguloy.clipboardeditor.Preferences.Pref.SYNC_PAUSE;
 import static com.trianguloy.clipboardeditor.Preferences.Pref.SYNC_START;
+import static com.trianguloy.clipboardeditor.Preferences.Pref.FLOATING_BUBBLE;
 
 import android.Manifest;
+import android.provider.Settings;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Notification;
@@ -91,7 +93,7 @@ public class Editor extends Activity {
         }
 
         // preferences
-        prefs = new Preferences(getPreferences(MODE_PRIVATE));
+        prefs = new Preferences(getSharedPreferences(Preferences.PREFS_NAME, MODE_PRIVATE));
 
         // clipboard
         clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
@@ -328,7 +330,12 @@ public class Editor extends Activity {
                 new PreferenceSwitch(SYNC_EXTERNAL, R.id.sync_external, null),
                 new PreferenceSwitch(SYNC_INPUT, R.id.sync_input, null),
                 new PreferenceSwitch(SYNC_BTN_IC, R.id.sync_btn_ic, checked -> findViewById(R.id.sync_to).setVisibility(checked ? VISIBLE : GONE)),
-                new PreferenceSwitch(SYNC_PAUSE, R.id.sync_pause, null)
+                new PreferenceSwitch(SYNC_PAUSE, R.id.sync_pause, null),
+                new PreferenceSwitch(FLOATING_BUBBLE, R.id.floating_bubble, checked -> {
+                    if (checked) {
+                        checkAndPromptPermissions();
+                    }
+                })
         )) {
             var switchView = content.<Switch>findViewById(preferenceSwitch.id);
             switchView.setChecked(prefs.is(preferenceSwitch.preference));
@@ -527,6 +534,41 @@ public class Editor extends Activity {
      */
     private static int getUniqueId() {
         return Long.valueOf(System.currentTimeMillis()).intValue();
+    }
+
+    private void checkAndPromptPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.canDrawOverlays(this)) {
+                Toast.makeText(this, R.string.toast_permission_draw_overlays, Toast.LENGTH_LONG).show();
+                try {
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                            Uri.parse("package:" + getPackageName()));
+                    startActivity(intent);
+                } catch (Exception e) {
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+                    startActivity(intent);
+                }
+                return;
+            }
+        }
+
+        if (!isAccessibilityServiceEnabled(this, ClipboardAccessibilityService.class)) {
+            Toast.makeText(this, R.string.toast_enable_accessibility, Toast.LENGTH_LONG).show();
+            try {
+                Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+                startActivity(intent);
+            } catch (Exception e) {
+                Toast.makeText(this, "Could not open Accessibility Settings. Please enable the service manually.", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    private static boolean isAccessibilityServiceEnabled(Context context, Class<?> service) {
+        String prefString = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+        if (prefString != null) {
+            return prefString.contains(context.getPackageName() + "/" + service.getName());
+        }
+        return false;
     }
 
 }

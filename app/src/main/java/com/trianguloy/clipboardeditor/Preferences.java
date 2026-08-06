@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 
 /** Simple Preferences wrapper */
 public class Preferences {
+    public static final String PREFS_NAME = "Editor";
     private final SharedPreferences prefs; // the prefs
 
     /** @param prefs preferences to wrap */
@@ -39,6 +40,7 @@ public class Preferences {
         SYNC_INPUT("syncInput", false),
         SYNC_BTN_IC("syncBtnIC", false),
         SYNC_PAUSE("syncPause", true),
+        FLOATING_BUBBLE("floatingBubble", false),
         ;
 
         private final String key;

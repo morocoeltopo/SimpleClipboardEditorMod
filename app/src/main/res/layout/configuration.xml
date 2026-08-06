@@ -26,6 +26,13 @@
         android:minHeight="48dp"
         android:text="@string/conf_statistics" />
 
+    <Switch
+        android:id="@+id/floating_bubble"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="48dp"
+        android:text="@string/conf_floating_bubble" />
+
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="2dp"

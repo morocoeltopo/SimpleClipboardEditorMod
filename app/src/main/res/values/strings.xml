@@ -36,6 +36,10 @@ Made by TrianguloY. Extremely small, efficient, without any permissions, free an
 
     <!-- settings -->
     <string name="conf_keyboard">Show keyboard when app opens</string>
+    <string name="conf_floating_bubble">Show small floating window on copy</string>
+    <string name="accessibility_service_description">Enables background clipboard detection to automatically show the floating contact editor bubble.</string>
+    <string name="toast_permission_draw_overlays">Please allow \"Draw over other apps\" permission to show the floating window.</string>
+    <string name="toast_enable_accessibility">Please enable the Simple Clipboard Editor Accessibility Service in Settings to detect clipboard copying.</string>
     <string name="conf_capitalize">Capitalize first letter of input sentences (some keyboards may ignore this)</string>
     <string name="conf_statistics">Show content statistics</string>
     <string name="conf_sync_ci">Clipboard → Input sync:</string>
